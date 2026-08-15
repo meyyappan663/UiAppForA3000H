@@ -1,28 +1,31 @@
-plugins {
-    id 'com.android.application'
-}
+name: Build DeskMint APK
 
-android {
-    namespace 'com.deskmint.dashboard'
-    compileSdk 35
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
-    defaultConfig {
-        applicationId 'com.deskmint.dashboard'
-        minSdk 17
-        targetSdk 28
-        versionCode 3
-        versionName '2.1-a3000h'
-    }
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
+    steps:
+      - uses: actions/checkout@v4
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-}
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "8.7"
+          cache-disabled: true
+
+      - name: Build APK
+        run: gradle assembleDebug --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DeskMint-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
